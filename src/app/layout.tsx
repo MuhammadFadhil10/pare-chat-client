@@ -1,6 +1,10 @@
+"use client";
+
+import "./global.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@mui/material";
 import { appTheme } from "@/utils";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,11 +16,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const queryClient = new QueryClient();
+
   return (
     <html lang="en">
-      <ThemeProvider theme={appTheme}>
-        <body>{children}</body>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={appTheme}>
+          <body>{children}</body>
+        </ThemeProvider>
+      </QueryClientProvider>
     </html>
   );
 }
