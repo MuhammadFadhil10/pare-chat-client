@@ -3,11 +3,15 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { UserAvatar } from "./UserAvatar";
 
+import { User } from "@/types";
+
 interface Props {
-  name: string;
+  user: User;
+  onClick: () => void;
+  isStatic?: boolean;
 }
 
-const Component = ({ name }: Props) => {
+const Component = ({ user, onClick, isStatic }: Props) => {
   return (
     <>
       <Box
@@ -15,15 +19,16 @@ const Component = ({ name }: Props) => {
           display: "flex",
           gap: 1,
           alignItems: "center",
-          cursor: "pointer",
+          cursor: !isStatic ? "pointer" : "default",
           ":hover": {
-            background: "#efefef",
+            background: !isStatic ? "#efefef" : "",
             transition: "300ms",
           },
         }}
+        onClick={() => !isStatic && onClick()}
       >
-        <UserAvatar name={name} />
-        <Typography>{name}</Typography>
+        <UserAvatar name={user.username} />
+        <Typography>{user.username}</Typography>
       </Box>
     </>
   );

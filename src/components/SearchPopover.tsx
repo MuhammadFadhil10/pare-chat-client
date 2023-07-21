@@ -7,6 +7,8 @@ import Typography from "@mui/material/Typography";
 import { ProfileDisplay } from "./ProfileDisplay";
 import { User } from "@/types";
 import { EmptySearchResult } from "./empty";
+import { useRouter } from "next/navigation";
+import { ChatFriendContext } from "@/context";
 
 interface Props {
   anchorEl: HTMLDivElement | HTMLElement | null;
@@ -16,7 +18,10 @@ interface Props {
 }
 
 const Component = ({ anchorEl, onClose, isLoading, users }: Props) => {
+  const { push } = useRouter();
   const open = Boolean(anchorEl);
+
+  const { chatFriend, setChatFriend } = React.useContext(ChatFriendContext);
 
   return (
     <>
@@ -65,7 +70,14 @@ const Component = ({ anchorEl, onClose, isLoading, users }: Props) => {
           {users.length > 0 && (
             <Stack gap={2}>
               {users?.map((user) => (
-                <ProfileDisplay key={user.id} name={user.username} />
+                <ProfileDisplay
+                  key={user.id}
+                  user={user}
+                  onClick={() => {
+                    setChatFriend({ id: user.id, username: user.username });
+                    onClose();
+                  }}
+                />
               ))}
             </Stack>
           )}

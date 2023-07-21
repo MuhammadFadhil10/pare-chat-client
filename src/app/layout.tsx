@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@mui/material";
 import { appTheme } from "@/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ChatFriendProvider } from "@/context";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,7 +23,9 @@ export default function RootLayout({
     <html lang="en">
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={appTheme}>
-          <body>{children}</body>
+          <ChatFriendProvider>
+            <body>{children}</body>
+          </ChatFriendProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </html>

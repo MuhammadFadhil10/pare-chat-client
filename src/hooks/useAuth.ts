@@ -29,7 +29,7 @@ export const useAuth = () => {
 
         setAuthToken(response.token);
 
-        push("/chats");
+        push("/home");
       } catch (error: any) {
         setSigninState({
           error: error.response.data.message,

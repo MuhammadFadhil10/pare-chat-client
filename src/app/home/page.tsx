@@ -1,14 +1,11 @@
 "use client";
-import { UserAvatar, Chats, Menu } from "@/components";
-import Container from "@mui/material/Container";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import * as React from "react";
+import { RoomChat } from "@/components";
+import { ChatFriendContext } from "@/context";
+import { User } from "@/types";
 
 export default function Page() {
-  return (
-    <>
-      <Menu />
-      <Chats />
-    </>
-  );
+  const { chatFriend } = React.useContext(ChatFriendContext);
+
+  return <>{chatFriend && <RoomChat user={chatFriend as User} />}</>;
 }
