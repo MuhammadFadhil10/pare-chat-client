@@ -6,6 +6,7 @@ import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { EmptyChat } from "../empty";
 
 const Component = () => {
   return (
@@ -23,13 +24,15 @@ const Component = () => {
             {JSON.parse(localStorage?.user ?? { username: "Buddy" }).username}!
           </Typography>
         </Stack>
-        
+
         <SearchUser />
 
         <Divider />
 
         {/* chat list */}
-        <Typography>Your chats</Typography>
+        <Typography sx={{ color: "text.primary" }}>Your chats</Typography>
+
+        <EmptyChat />
       </Stack>
     </Container>
   );

@@ -6,6 +6,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { ProfileDisplay } from "./ProfileDisplay";
 import { User } from "@/types";
+import { EmptySearchResult } from "./empty";
 
 interface Props {
   anchorEl: HTMLDivElement | HTMLElement | null;
@@ -68,6 +69,8 @@ const Component = ({ anchorEl, onClose, isLoading, users }: Props) => {
               ))}
             </Stack>
           )}
+
+          {users.length === 0 && !isLoading && <EmptySearchResult />}
         </Box>
       </Popover>
     </>
