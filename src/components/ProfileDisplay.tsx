@@ -11,6 +11,7 @@ interface Props {
   isStatic?: boolean;
   boldName?: boolean;
   message?: string;
+  maxMessageLength?: number;
 }
 
 const Component = ({
@@ -19,6 +20,7 @@ const Component = ({
   isStatic,
   boldName = false,
   message,
+  maxMessageLength = 0,
 }: Props) => {
   return (
     <>
@@ -36,7 +38,11 @@ const Component = ({
         onClick={() => !isStatic && onClick && onClick()}
       >
         <UserAvatar name={user.username} />
-        <Box>
+        <Box
+          sx={{
+            width: "70%",
+          }}
+        >
           <Typography
             sx={{
               fontWeight: boldName ? "bold" : "inherit",
@@ -45,7 +51,18 @@ const Component = ({
           >
             {user.username}
           </Typography>
-          {!!message && <Typography>{message}</Typography>}
+          {!!message && (
+            <Typography
+              sx={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                color: "text.primary",
+              }}
+            >
+              {message}
+            </Typography>
+          )}
         </Box>
       </Box>
     </>

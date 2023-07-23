@@ -4,12 +4,14 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import SendIcon from "@mui/icons-material/Send";
-import { User } from "@/types";
+import { Chat, User } from "@/types";
 import { ProfileDisplay } from "../ProfileDisplay";
 import { socket } from "@/utils";
 import { ChatFriendContext } from "@/context";
 import { useQuery } from "@tanstack/react-query";
 import { Message } from "@/api";
+import { Bubble } from "./Bubble";
+import { UserAvatar } from "../UserAvatar";
 
 interface Props {
   user: User;
@@ -22,7 +24,7 @@ const Component = ({ user }: Props) => {
   });
 
   const [message, setMessage] = React.useState("");
-  const [chats, setChats] = React.useState<unknown[]>([]);
+  const [chats, setChats] = React.useState<Chat[]>([]);
 
   const { chatFriend } = React.useContext(ChatFriendContext);
 
@@ -33,8 +35,8 @@ const Component = ({ user }: Props) => {
       socket.emit(
         "message",
         {
-          senderId: JSON.parse(localStorage.user).id,
-          receiverId: chatFriend?.id,
+          sender: JSON.parse(localStorage.user),
+          receiver: chatFriend,
           message,
         },
         (response: any) => {
@@ -44,7 +46,7 @@ const Component = ({ user }: Props) => {
         }
       );
     },
-    [chatFriend?.id, chats, message]
+    [chatFriend, chats, message]
   );
 
   React.useEffect(() => {
@@ -66,27 +68,46 @@ const Component = ({ user }: Props) => {
   }, [rawChats]);
 
   return (
-    <Stack alignItems="center" sx={{ width: "100vw" }}>
-      <Box sx={{ boxShadow: 1, p: 1 }}>
-        <ProfileDisplay user={user} onClick={() => undefined} isStatic />
+    <Stack alignItems="center" gap={2} sx={{ width: "100vw" }}>
+      <Box sx={{ boxShadow: 1, p: 1, width: "100%", boxSizing: "border-box" }}>
+        <ProfileDisplay
+          user={user}
+          onClick={() => undefined}
+          isStatic
+          boldName
+        />
       </Box>
 
       {/* bubble container */}
-      <Stack sx={{ width: "700px", height: "80%", px: 2 }}>
-        {chats.map((chat: any, index) => (
-          <Typography
-            key={index}
-            sx={{
-              alignSelf: chat.sender
-                ? chat.sender.id === JSON.parse(localStorage.user).id
-                  ? "flex-end"
-                  : "inherit"
-                : "flex-end",
-            }}
-          >
-            {chat.message}
-          </Typography>
-        ))}
+      <Stack
+        gap={2}
+        sx={{ width: "90%", height: "70%", px: 2, overflowY: "auto" }}
+      >
+        {chats
+          .filter(
+            (chat) => chat.person?.id === (chatFriend as Partial<User>)?.id
+          )
+          .map((chat: any, index) => (
+            <Box
+              key={index}
+              sx={{
+                alignSelf: chat.sender
+                  ? chat.sender.id === JSON.parse(localStorage.user).id
+                    ? "flex-end"
+                    : "inherit"
+                  : "flex-end",
+                display: "flex",
+                gap: 1,
+                flexDirection:
+                  chat.sender?.id === JSON.parse(localStorage.user).id
+                    ? "row-reverse"
+                    : "row",
+              }}
+            >
+              <UserAvatar name={chat.sender.username} />
+              <Bubble message={chat.message} />
+            </Box>
+          ))}
       </Stack>
 
       <Box

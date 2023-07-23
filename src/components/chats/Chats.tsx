@@ -40,14 +40,14 @@ const Component = () => {
     chats
       .slice()
       .reverse()
-      .every((chat) => {
+      .forEach((chat) => {
         const existPersonChat = tempChat.find(
           (personChat) => personChat.person.id === chat.person.id
         );
-
-        if (existPersonChat) return;
-
-        tempChat.push(chat);
+        
+        if (!existPersonChat) {
+          tempChat.push(chat);
+        }
       });
 
     return tempChat;
