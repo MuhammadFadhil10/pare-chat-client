@@ -61,7 +61,7 @@ const Component = () => {
       });
 
     return tempChat;
-  }, [chats]);
+  }, [chats, userLoggedin]);
 
   React.useEffect(() => {
     if (userLoggedin) {
