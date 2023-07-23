@@ -13,7 +13,7 @@ const Component = () => {
           You have no chat!
         </Typography>
         <Typography sx={{ color: "text.primary" }}>
-          Are u lonely? go find a friend to chat, dude!
+          Lets chat if u need me
         </Typography>
       </Stack>
 

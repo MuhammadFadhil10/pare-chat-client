@@ -2,8 +2,8 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import SendIcon from "@mui/icons-material/Send";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Chat, User } from "@/types";
 import { ProfileDisplay } from "../ProfileDisplay";
 import { socket } from "@/utils";
@@ -26,7 +26,7 @@ const Component = ({ user }: Props) => {
   const [message, setMessage] = React.useState("");
   const [chats, setChats] = React.useState<Chat[]>([]);
 
-  const { chatFriend } = React.useContext(ChatFriendContext);
+  const { chatFriend, setChatFriend } = React.useContext(ChatFriendContext);
 
   const onSendMessage = React.useCallback(
     (e: React.FormEvent) => {
@@ -67,9 +67,44 @@ const Component = ({ user }: Props) => {
     if (rawChats) setChats(rawChats);
   }, [rawChats]);
 
+  React.useEffect(() => {
+    console.log("chats: ", chats);
+    console.log("id: ", (chatFriend as Partial<User>).id);
+
+    if (chats.length > 0) {
+      console.log(
+        "new chats: ",
+        chats.filter(
+          (chat) => chat.person.id === (chatFriend as Partial<User>).id
+        )
+      );
+    }
+  }, [chatFriend, chats]);
+
   return (
     <Stack alignItems="center" gap={2} sx={{ width: "100vw" }}>
-      <Box sx={{ boxShadow: 1, p: 1, width: "100%", boxSizing: "border-box" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          alignItems: "center",
+          boxShadow: 1,
+          p: 1,
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <ArrowBackIcon
+          fontSize="medium"
+          sx={(theme) => ({
+            color: "text.primary",
+            cursor: "pointer",
+            [theme.breakpoints.up("lg")]: {
+              display: "none",
+            },
+          })}
+          onClick={() => setChatFriend(null)}
+        />
         <ProfileDisplay
           user={user}
           onClick={() => undefined}
@@ -84,9 +119,7 @@ const Component = ({ user }: Props) => {
         sx={{ width: "90%", height: "70%", px: 2, overflowY: "auto" }}
       >
         {chats
-          .filter(
-            (chat) => chat.person?.id === (chatFriend as Partial<User>)?.id
-          )
+          .filter((chat) => chat.person.id === (chatFriend as Partial<User>).id)
           .map((chat: any, index) => (
             <Box
               key={index}
@@ -111,7 +144,7 @@ const Component = ({ user }: Props) => {
       </Stack>
 
       <Box
-        sx={{
+        sx={(theme) => ({
           position: "fixed",
           bottom: "30px",
           width: "60vw",
@@ -119,7 +152,10 @@ const Component = ({ user }: Props) => {
           justifyContent: "center",
           alignItems: "center",
           gap: 2,
-        }}
+          [theme.breakpoints.between("xs", "lg")]: {
+            width: "100%",
+          },
+        })}
       >
         <TextField
           size="medium"

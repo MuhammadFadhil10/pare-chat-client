@@ -20,12 +20,23 @@ const Component = () => {
     queryKey: ["chats"],
   });
 
-  const { setChatFriend } = React.useContext(ChatFriendContext);
+  const { chatFriend, setChatFriend } = React.useContext(ChatFriendContext);
 
   const [chats, setChats] = React.useState<Chat[]>([]);
 
   socket.on("message", (val) => {
+    // const existPersonChat = val.find(
+    //   (personChat: any) =>
+    //     personChat.receiver.id === JSON.parse(localStorage.user).id ||
+    //     personChat.sender.id === JSON.parse(localStorage.user).id
+    // );
+
+    // alert(JSON.stringify(existPersonChat));
+
+    // if (existPersonChat) {
+    console.log("asd");
     setChats(val);
+    // }
   });
 
   React.useEffect(() => {
@@ -42,9 +53,12 @@ const Component = () => {
       .reverse()
       .forEach((chat) => {
         const existPersonChat = tempChat.find(
-          (personChat) => personChat.person.id === chat.person.id
+          (personChat) =>
+            personChat.person.id === chat.person.id &&
+            (personChat.receiver.id === JSON.parse(localStorage.user).id ||
+              personChat.sender.id === JSON.parse(localStorage.user).id)
         );
-        
+
         if (!existPersonChat) {
           tempChat.push(chat);
         }
@@ -53,8 +67,26 @@ const Component = () => {
     return tempChat;
   }, [chats]);
 
+  React.useEffect(() => {
+    console.log("filteredChats: ", filteredChats);
+  }, [filteredChats]);
+
+  React.useEffect(() => {
+    socket.emit("join-room", JSON.parse(localStorage.user).id);
+  }, []);
+
   return (
-    <Container maxWidth="sm" sx={{ boxShadow: 2, py: 2, height: "100vh" }}>
+    <Container
+      maxWidth="sm"
+      sx={(theme) => ({
+        boxShadow: 2,
+        py: 2,
+        height: "100vh",
+        [theme.breakpoints.between("xs", "lg")]: {
+          display: chatFriend ? "none" : "block",
+        },
+      })}
+    >
       <Stack gap={2}>
         <Stack direction="row" gap={2} alignItems="center">
           <UserAvatar
