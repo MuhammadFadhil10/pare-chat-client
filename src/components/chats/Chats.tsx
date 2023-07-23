@@ -8,13 +8,50 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { EmptyChat } from "../empty";
 import { socket } from "@/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Message } from "@/api";
+import { Chat } from "@/types";
+import { ProfileDisplay } from "../ProfileDisplay";
+import { ChatFriendContext } from "@/context";
 
 const Component = () => {
-  const [history, setHistory] = React.useState<unknown[]>([]);
+  const { data: rawChats } = useQuery({
+    queryFn: () => Message.getChats(JSON.parse(localStorage.user).id),
+    queryKey: ["chats"],
+  });
+
+  const { setChatFriend } = React.useContext(ChatFriendContext);
+
+  const [chats, setChats] = React.useState<Chat[]>([]);
 
   socket.on("message", (val) => {
-    setHistory([...history, JSON.parse(val)]);
+    setChats(val);
   });
+
+  React.useEffect(() => {
+    if (rawChats) setChats(rawChats);
+  }, [rawChats]);
+
+  const filteredChats = React.useMemo(() => {
+    if (!chats) return [];
+
+    const tempChat: Chat[] = [];
+
+    chats
+      .slice()
+      .reverse()
+      .every((chat) => {
+        const existPersonChat = tempChat.find(
+          (personChat) => personChat.person.id === chat.person.id
+        );
+
+        if (existPersonChat) return;
+
+        tempChat.push(chat);
+      });
+
+    return tempChat;
+  }, [chats]);
 
   return (
     <Container maxWidth="sm" sx={{ boxShadow: 2, py: 2, height: "100vh" }}>
@@ -39,17 +76,23 @@ const Component = () => {
         {/* chat list */}
         <Typography sx={{ color: "text.primary" }}>Your chats</Typography>
 
-        {history.length === 0 && <EmptyChat />}
+        {filteredChats.length === 0 && <EmptyChat />}
 
-        {/* {history.map((h: any, index) => (
-          <Typography key={index}>{h.message}</Typography>
-        ))} */}
-
-        <Typography>
-          {(history[history.length - 1] as any)?.receiverId ===
-            JSON.parse(localStorage.user).id &&
-            (history[history.length - 1] as any)?.message}
-        </Typography>
+        {filteredChats.map((chat) => (
+          <>
+            <ProfileDisplay
+              user={chat.person}
+              message={chat.message}
+              boldName
+              onClick={() =>
+                setChatFriend({
+                  id: chat.person.id,
+                  username: chat.person.username,
+                })
+              }
+            />
+          </>
+        ))}
       </Stack>
     </Container>
   );

@@ -7,11 +7,19 @@ import { User } from "@/types";
 
 interface Props {
   user: User;
-  onClick: () => void;
+  onClick?: () => void;
   isStatic?: boolean;
+  boldName?: boolean;
+  message?: string;
 }
 
-const Component = ({ user, onClick, isStatic }: Props) => {
+const Component = ({
+  user,
+  onClick,
+  isStatic,
+  boldName = false,
+  message,
+}: Props) => {
   return (
     <>
       <Box
@@ -25,10 +33,20 @@ const Component = ({ user, onClick, isStatic }: Props) => {
             transition: "300ms",
           },
         }}
-        onClick={() => !isStatic && onClick()}
+        onClick={() => !isStatic && onClick && onClick()}
       >
         <UserAvatar name={user.username} />
-        <Typography>{user.username}</Typography>
+        <Box>
+          <Typography
+            sx={{
+              fontWeight: boldName ? "bold" : "inherit",
+              color: "text.primary",
+            }}
+          >
+            {user.username}
+          </Typography>
+          {!!message && <Typography>{message}</Typography>}
+        </Box>
       </Box>
     </>
   );

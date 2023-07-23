@@ -8,30 +8,23 @@ import { User } from "@/types";
 import { ProfileDisplay } from "../ProfileDisplay";
 import { socket } from "@/utils";
 import { ChatFriendContext } from "@/context";
+import { useQuery } from "@tanstack/react-query";
+import { Message } from "@/api";
 
 interface Props {
   user: User;
 }
 
 const Component = ({ user }: Props) => {
+  const { data: rawChats } = useQuery({
+    queryFn: () => Message.getChats(JSON.parse(localStorage.user).id),
+    queryKey: ["chats"],
+  });
+
   const [message, setMessage] = React.useState("");
-  const [history, setHistory] = React.useState<unknown[]>([]);
+  const [chats, setChats] = React.useState<unknown[]>([]);
 
   const { chatFriend } = React.useContext(ChatFriendContext);
-
-  React.useEffect(() => {
-    socket.on("message", (val) => {
-      const data = JSON.parse(val);
-
-      if (data.receiverId === JSON.parse(localStorage.user).id) {
-        setHistory([...history, data]);
-      }
-    });
-
-    return () => {
-      socket.off("message");
-    };
-  }, [history, user.id]);
 
   const onSendMessage = React.useCallback(
     (e: React.FormEvent) => {
@@ -39,20 +32,38 @@ const Component = ({ user }: Props) => {
 
       socket.emit(
         "message",
-        JSON.stringify({
+        {
           senderId: JSON.parse(localStorage.user).id,
           receiverId: chatFriend?.id,
           message,
-        }),
-        (response: string) => {
+        },
+        (response: any) => {
           setMessage("");
 
-          setHistory([...history, JSON.parse(response)]);
+          setChats([...chats, response]);
         }
       );
     },
-    [chatFriend?.id, history, message]
+    [chatFriend?.id, chats, message]
   );
+
+  React.useEffect(() => {
+    socket.on("message", (val) => {
+      const data = val;
+
+      if (data.receiverId === JSON.parse(localStorage.user).id) {
+        setChats([...chats, data]);
+      }
+    });
+
+    return () => {
+      socket.off("message");
+    };
+  }, [chats, user.id]);
+
+  React.useEffect(() => {
+    if (rawChats) setChats(rawChats);
+  }, [rawChats]);
 
   return (
     <Stack alignItems="center" sx={{ width: "100vw" }}>
@@ -62,17 +73,18 @@ const Component = ({ user }: Props) => {
 
       {/* bubble container */}
       <Stack sx={{ width: "700px", height: "80%", px: 2 }}>
-        {history.map((h: any, index) => (
+        {chats.map((chat: any, index) => (
           <Typography
             key={index}
             sx={{
-              alignSelf:
-                h.senderId === JSON.parse(localStorage.user).id
+              alignSelf: chat.sender
+                ? chat.sender.id === JSON.parse(localStorage.user).id
                   ? "flex-end"
-                  : "inherit",
+                  : "inherit"
+                : "flex-end",
             }}
           >
-            {h.message}
+            {chat.message}
           </Typography>
         ))}
       </Stack>
