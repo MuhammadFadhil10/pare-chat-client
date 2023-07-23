@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -18,9 +20,16 @@ interface Props {
 }
 
 const Component = ({ user }: Props) => {
+  const [userLoggedin, setUserLoggedin] = React.useState<User>();
+
+  if (typeof window !== "undefined") {
+    setUserLoggedin(JSON.parse(localStorage.user));
+  }
+
   const { data: rawChats } = useQuery({
-    queryFn: () => Message.getChats(JSON.parse(localStorage.user).id),
-    queryKey: ["chats"],
+    queryFn: () =>
+      userLoggedin ? Message.getChats(userLoggedin.id) : undefined,
+    queryKey: ["chats", userLoggedin],
   });
 
   const [message, setMessage] = React.useState("");
@@ -35,7 +44,7 @@ const Component = ({ user }: Props) => {
       socket.emit(
         "message",
         {
-          sender: JSON.parse(localStorage.user),
+          sender: userLoggedin,
           receiver: chatFriend,
           message,
         },
@@ -53,7 +62,7 @@ const Component = ({ user }: Props) => {
     socket.on("message", (val) => {
       const data = val;
 
-      if (data.receiverId === JSON.parse(localStorage.user).id) {
+      if (data.receiverId === userLoggedin?.id) {
         setChats([...chats, data]);
       }
     });
@@ -68,9 +77,6 @@ const Component = ({ user }: Props) => {
   }, [rawChats]);
 
   React.useEffect(() => {
-    console.log("chats: ", chats);
-    console.log("id: ", (chatFriend as Partial<User>).id);
-
     if (chats.length > 0) {
       console.log(
         "new chats: ",
@@ -118,29 +124,30 @@ const Component = ({ user }: Props) => {
         gap={2}
         sx={{ width: "90%", height: "70%", px: 2, overflowY: "auto" }}
       >
-        {chats
-          .filter((chat) => chat.person.id === (chatFriend as Partial<User>).id)
-          .map((chat: any, index) => (
-            <Box
-              key={index}
-              sx={{
-                alignSelf: chat.sender
-                  ? chat.sender.id === JSON.parse(localStorage.user).id
-                    ? "flex-end"
-                    : "inherit"
-                  : "flex-end",
-                display: "flex",
-                gap: 1,
-                flexDirection:
-                  chat.sender?.id === JSON.parse(localStorage.user).id
-                    ? "row-reverse"
-                    : "row",
-              }}
-            >
-              <UserAvatar name={chat.sender.username} />
-              <Bubble message={chat.message} />
-            </Box>
-          ))}
+        {userLoggedin &&
+          chats
+            .filter(
+              (chat) => chat.person.id === (chatFriend as Partial<User>).id
+            )
+            .map((chat: any, index) => (
+              <Box
+                key={index}
+                sx={{
+                  alignSelf: chat.sender
+                    ? chat.sender.id === userLoggedin.id
+                      ? "flex-end"
+                      : "inherit"
+                    : "flex-end",
+                  display: "flex",
+                  gap: 1,
+                  flexDirection:
+                    chat.sender?.id === userLoggedin.id ? "row-reverse" : "row",
+                }}
+              >
+                <UserAvatar name={chat.sender.username} />
+                <Bubble message={chat.message} />
+              </Box>
+            ))}
       </Stack>
 
       <Box
