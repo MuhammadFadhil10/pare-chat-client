@@ -14,16 +14,17 @@ import { useQuery } from "@tanstack/react-query";
 import { Message } from "@/api";
 import { Bubble } from "./Bubble";
 import { UserAvatar } from "../UserAvatar";
+import dynamic from "next/dynamic";
 
 interface Props {
   user: User;
 }
 
 const Component = ({ user }: Props) => {
-  const [userLoggedin, setUserLoggedin] = React.useState<User>();
+  let userLoggedin: User | undefined;
 
   if (typeof window !== "undefined") {
-    setUserLoggedin(JSON.parse(localStorage.user));
+    userLoggedin = JSON.parse(localStorage.user);
   }
 
   const { data: rawChats } = useQuery({
@@ -134,17 +135,20 @@ const Component = ({ user }: Props) => {
                 key={index}
                 sx={{
                   alignSelf: chat.sender
-                    ? chat.sender.id === userLoggedin.id
+                    ? chat.sender.id === userLoggedin?.id
                       ? "flex-end"
                       : "inherit"
                     : "flex-end",
                   display: "flex",
                   gap: 1,
                   flexDirection:
-                    chat.sender?.id === userLoggedin.id ? "row-reverse" : "row",
+                    chat.sender?.id === userLoggedin?.id
+                      ? "row-reverse"
+                      : "row",
                 }}
               >
-                <UserAvatar name={chat.sender.username} />
+                {chat.sender && <UserAvatar name={chat.sender.username} />}
+
                 <Bubble message={chat.message} />
               </Box>
             ))}

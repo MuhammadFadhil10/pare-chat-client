@@ -1,6 +1,6 @@
 {
   "extends": "next/core-web-vitals",
-  "plugins": ["@tanstack/query"],
+  "plugins": ["@tanstack/query", "eslint:recommended"],
   "rules": {
     "@tanstack/query/exhaustive-deps": "error"
   }

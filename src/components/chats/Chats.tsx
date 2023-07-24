@@ -15,10 +15,12 @@ import { ProfileDisplay } from "../ProfileDisplay";
 import { ChatFriendContext } from "@/context";
 
 const Component = () => {
-  const [userLoggedin, setUserLoggedin] = React.useState<User>();
+  const [isRender, setIsRender] = React.useState(false);
+
+  let userLoggedin: User | undefined;
 
   if (typeof window !== "undefined") {
-    setUserLoggedin(JSON.parse(localStorage.user));
+    userLoggedin = JSON.parse(localStorage.user);
   }
 
   const { data: rawChats } = useQuery({
@@ -39,6 +41,10 @@ const Component = () => {
     if (rawChats) setChats(rawChats);
   }, [rawChats]);
 
+  React.useEffect(() => {
+    setIsRender(true);
+  }, []);
+
   const filteredChats = React.useMemo(() => {
     if (!chats || !userLoggedin) return [];
 
@@ -51,8 +57,8 @@ const Component = () => {
         const existPersonChat = tempChat.find(
           (personChat) =>
             personChat.person.id === chat.person.id &&
-            (personChat.receiver.id === userLoggedin.id ||
-              personChat.sender.id === userLoggedin.id)
+            (personChat.receiver.id === userLoggedin?.id ||
+              personChat.sender.id === userLoggedin?.id)
         );
 
         if (!existPersonChat) {
@@ -82,9 +88,9 @@ const Component = () => {
       })}
     >
       <Stack gap={2}>
-        {userLoggedin && (
+        {userLoggedin && isRender && (
           <Stack direction="row" gap={2} alignItems="center">
-            <UserAvatar name={userLoggedin.username} />
+            {isRender && <UserAvatar name={userLoggedin.username} />}
             <Typography fontSize={25} sx={{ color: "text.primary" }}>
               Hello, {userLoggedin.username}!
             </Typography>
