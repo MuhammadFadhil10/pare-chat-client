@@ -56,7 +56,7 @@ const Component = ({ user }: Props) => {
         }
       );
     },
-    [chatFriend, chats, message]
+    [chatFriend, chats, message, userLoggedin]
   );
 
   React.useEffect(() => {
